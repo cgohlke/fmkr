@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
 # fmkr/setup.py
+
+"""Fmkr package setuptools script."""
 
 import sys
 import re
@@ -9,8 +12,8 @@ with open('fmkr/fmkr.py') as fh:
     code = fh.read()
 
 version = re.search(r"__version__ = '(.*?)'", code).groups()[0]
-description = re.search(r'"""(.*)\.\n', code).groups()[0]
-readme = re.search(r'[\r\n?|\n]{2}"""(.*)"""[\r\n?|\n]{2}import', code,
+description = re.search(r'"""(.*)\.[\r\n?|\n]', code).groups()[0]
+readme = re.search(r'[\r\n?|\n]{2}"""(.*)"""[\r\n?|\n]{2}__version__', code,
                    re.MULTILINE | re.DOTALL).groups()[0]
 license = re.search(r'(# Copyright.*?[\r\n?|\n])[\r\n?|\n]+""', code,
                     re.MULTILINE | re.DOTALL).groups()[0]
@@ -35,8 +38,8 @@ setup(
     url='https://www.lfd.uci.edu/~gohlke/',
     packages=['fmkr'],
     install_requires=['lxml>=4.2'],
+    python_requires='>=3.5',
     license='BSD',
-    zip_safe=True,
     platforms=['any'],
     classifiers=[
         'Development Status :: 4 - Beta',

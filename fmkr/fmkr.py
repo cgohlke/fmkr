@@ -9,19 +9,21 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
-# * Redistributions of source code must retain the above copyright
-#   notice, this list of conditions and the following disclaimer.
-# * Redistributions in binary form must reproduce the above copyright
-#   notice, this list of conditions and the following disclaimer in the
-#   documentation and/or other materials provided with the distribution.
-# * Neither the name of the copyright holders nor the names of any
-#   contributors may be used to endorse or promote products derived
-#   from this software without specific prior written permission.
+# * Redistributions of source code must retain the above copyright notice,
+#   this list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# * Neither the name of the copyright holder nor the names of its
+#   contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
 # LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 # CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -32,9 +34,10 @@
 
 """Access FileMaker(tm) Server Databases.
 
-Access FileMaker(tm) Server 8 Advanced databases via XML publishing interface.
+Fmkr is a Python library to access FileMaker(tm) Server 8 Advanced databases
+via the XML publishing interface.
 
-FileMaker is a registered trademark of FileMaker Inc.
+"FileMaker" is a registered trademark of FileMaker Inc.
 
 :Author:
   `Christoph Gohlke <https://www.lfd.uci.edu/~gohlke/>`_
@@ -42,7 +45,7 @@ FileMaker is a registered trademark of FileMaker Inc.
 :Organization:
   Laboratory for Fluorescence Dynamics. University of California, Irvine
 
-:Version: 2018.8.15
+:Version: 2018.10.18
 
 Requirements
 ------------
@@ -53,7 +56,7 @@ Requirements
 Revisions
 ---------
 2018.8.15
-    Move module into fmkr package.
+    Move fmkr.py into fmkr package.
 2018.5.25
     Use lxml instead of minidom to parse FMPXMLResult.
     Improve string representations of FMPXMLResult and FMField.
@@ -98,6 +101,10 @@ FileMaker Error 401: No records match the request
 
 """
 
+__version__ = '2018.10.18'
+__docformat__ = 'restructuredtext en'
+__all__ = 'FM', 'FMError', 'FMField', 'FMPXMLResult'
+
 import base64
 from html import escape
 from urllib.parse import urlencode
@@ -107,12 +114,7 @@ from urllib.error import HTTPError, URLError
 from lxml import etree
 
 
-__version__ = '2018.8.15'
-__docformat__ = 'restructuredtext en'
-__all__ = 'FM', 'FMError', 'FMField', 'FMPXMLResult'
-
-
-class FM(object):
+class FM():
     """FileMaker Server 8 Advanced XML publishing interface."""
 
     _url = '%(_protocol)s://%(_server)s:%(_port)s/fmi/xml/FMPXMLRESULT.xml'
@@ -413,7 +415,7 @@ class FM(object):
         return results
 
 
-class FMPXMLResult(object):
+class FMPXMLResult():
     """Result of FileMaker XML publishing interface query.
 
     Attributes
@@ -465,7 +467,7 @@ class FMPXMLResult(object):
                 if self.resultset else '[]')))
 
 
-class FMField(object):
+class FMField():
     """Attributes of FileMaker metadata field.
 
     Attributes

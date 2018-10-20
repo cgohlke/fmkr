@@ -1,9 +1,10 @@
 Access FileMaker(tm) Server Databases
 =====================================
 
-Access FileMaker(tm) Server 8 Advanced databases via XML publishing interface.
+Fmkr is a Python library to access FileMaker(tm) Server 8 Advanced databases
+via the XML publishing interface.
 
-FileMaker is a registered trademark of FileMaker Inc.
+"FileMaker" is a registered trademark of FileMaker Inc.
 
 :Author:
   `Christoph Gohlke <https://www.lfd.uci.edu/~gohlke/>`_
@@ -11,7 +12,7 @@ FileMaker is a registered trademark of FileMaker Inc.
 :Organization:
   Laboratory for Fluorescence Dynamics. University of California, Irvine
 
-:Version: 2018.8.15
+:Version: 2018.10.18
 
 Requirements
 ------------
@@ -22,7 +23,7 @@ Requirements
 Revisions
 ---------
 2018.8.15
-    Move module into fmkr package.
+    Move fmkr.py into fmkr package.
 2018.5.25
     Use lxml instead of minidom to parse FMPXMLResult.
     Improve string representations of FMPXMLResult and FMField.

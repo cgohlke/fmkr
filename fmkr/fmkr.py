@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # fmkr.py
 
-# Copyright (c) 2006-2018, Christoph Gohlke
-# Copyright (c) 2006-2018, The Regents of the University of California
+# Copyright (c) 2006-2019, Christoph Gohlke
+# Copyright (c) 2006-2019, The Regents of the University of California
 # Produced at the Laboratory for Fluorescence Dynamics
 # All rights reserved.
 #
@@ -45,7 +45,7 @@ via the XML publishing interface.
 :Organization:
   Laboratory for Fluorescence Dynamics. University of California, Irvine
 
-:Version: 2018.10.18
+:Version: 2019.1.1
 
 Requirements
 ------------
@@ -55,6 +55,8 @@ Requirements
 
 Revisions
 ---------
+2019.1.1
+    Update copyright year.
 2018.8.15
     Move fmkr.py into fmkr package.
 2018.5.25
@@ -101,7 +103,7 @@ FileMaker Error 401: No records match the request
 
 """
 
-__version__ = '2018.10.18'
+__version__ = '2019.1.1'
 __docformat__ = 'restructuredtext en'
 __all__ = 'FM', 'FMError', 'FMField', 'FMPXMLResult'
 

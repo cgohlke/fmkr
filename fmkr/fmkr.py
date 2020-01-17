@@ -1,24 +1,21 @@
-# -*- coding: utf-8 -*-
 # fmkr.py
 
-# Copyright (c) 2006-2019, Christoph Gohlke
-# Copyright (c) 2006-2019, The Regents of the University of California
-# Produced at the Laboratory for Fluorescence Dynamics
+# Copyright (c) 2006-2020, Christoph Gohlke
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
-# * Redistributions of source code must retain the above copyright notice,
-#   this list of conditions and the following disclaimer.
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
 #
-# * Redistributions in binary form must reproduce the above copyright notice,
-#   this list of conditions and the following disclaimer in the documentation
-#   and/or other materials provided with the distribution.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
 #
-# * Neither the name of the copyright holder nor the names of its
-#   contributors may be used to endorse or promote products derived from
-#   this software without specific prior written permission.
+# 3. Neither the name of the copyright holder nor the names of its
+#    contributors may be used to endorse or promote products derived from
+#    this software without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -45,31 +42,34 @@ via the XML publishing interface.
 :Organization:
   Laboratory for Fluorescence Dynamics. University of California, Irvine
 
-:Version: 2019.1.1
+:License: BSD 3-Clause
+
+:Version: 2020.1.1
 
 Requirements
 ------------
-* `CPython 3.5+ <https://www.python.org>`_
-* `FileMaker(tm) Server 8 Advanced <https://www.filemaker.com>`_
+* `CPython >= 3.6 <https://www.python.org>`_
 * `lxml 4.2 <https://github.com/lxml/lxml>`_
+* `FileMaker(tm) Server 8 Advanced <https://www.filemaker.com>`_
 
 Revisions
 ---------
-2019.1.1
-    Update copyright year.
+2020.1.1
+    Remove support for Python 3.5.
+    Update copyright.
 2018.8.15
     Move fmkr.py into fmkr package.
 2018.5.25
     Use lxml instead of minidom to parse FMPXMLResult.
     Improve string representations of FMPXMLResult and FMField.
     Update error codes.
-    Drop support for Python 2.
+    Remove support for Python 2.
 2006.10.30
     Initial release.
 
 References
 ----------
-(1) http://www.filemaker.com/downloads/documentation/fmsa8_custom_web_guide.pdf
+1. http://www.filemaker.com/downloads/documentation/fmsa8_custom_web_guide.pdf
 
 Examples
 --------
@@ -97,15 +97,15 @@ John Doe
 >>> try:
 ...    fmi.add_db_param('LAST', 'Doe', 'cn')
 ...    fmi.fm_find()
-... except FMError as e:
-...    print(e)
+... except FMError as exc:
+...    print(exc)
 FileMaker Error 401: No records match the request
 
 """
 
-__version__ = '2019.1.1'
-__docformat__ = 'restructuredtext en'
-__all__ = 'FM', 'FMError', 'FMField', 'FMPXMLResult'
+__version__ = '2020.1.1'
+
+__all__ = ('FM', 'FMError', 'FMField', 'FMPXMLResult')
 
 import base64
 from html import escape
@@ -116,10 +116,10 @@ from urllib.error import HTTPError, URLError
 from lxml import etree
 
 
-class FM():
+class FM:
     """FileMaker Server 8 Advanced XML publishing interface."""
 
-    _url = '%(_protocol)s://%(_server)s:%(_port)s/fmi/xml/FMPXMLRESULT.xml'
+    URL = '{_protocol}://{_server}:{_port}/fmi/xml/FMPXMLRESULT.xml'
 
     def __init__(self, server, port=80, protocol='http'):
         """Specify location of the FileMaker XML publishing interface.
@@ -177,10 +177,6 @@ class FM():
         password : str
             Password associated with user.
 
-        Notes
-        -----
-        The file containing password should be kept outside the Web folder.
-
         """
         self._dbuser = str(username)
         self._dbpasswd = str(password)
@@ -236,7 +232,7 @@ class FM():
 
     def set_escape(self, value=True):
         """Specify to escape and encode all u'TEXT' types in result records."""
-        self._escrslt = True if value else False
+        self._escrslt = bool(value)
 
     def add_db_param(self, field, value, op=None):
         """Specify field data and query criteria. May be called multiple times.
@@ -262,7 +258,7 @@ class FM():
         """
         self._dbparams_append((field, value))
         if op:
-            self._dbparams_append(('%s.op' % field, op))
+            self._dbparams_append((f'{field}.op', op))
 
     def add_db_params(self, fieldvalues):
         """Specify multiple parameters using sequence of (field, value)."""
@@ -286,8 +282,8 @@ class FM():
             specified order (default: 0).
 
         """
-        self._dbparams_append(('-sortfield.%i' % priority, field))
-        self._dbparams_append(('-sortorder.%i' % priority, order))
+        self._dbparams_append((f'-sortfield.{priority}', field))
+        self._dbparams_append((f'-sortorder.{priority}', order))
 
     def fm_find(self):
         """Find records matching preset search criteria.
@@ -341,23 +337,23 @@ class FM():
         """
         self._dbparams_append(('-max', self._maxret))
 
-        url = self._url % self.__dict__
+        url = FM.URL.format(**self.__dict__)
         data = urlencode(self._dbdata + self._dbparams) + '&-' + action
         self._dbparams = []
         # use POST to submit data
         request = Request(url, data.encode('ascii'))
         request.add_header('User-Agent', b'Fmkr.py')
         # authorization header
-        auth = '%s:%s' % (self._dbuser, self._dbpasswd)
+        auth = f'{self._dbuser}:{self._dbpasswd}'
         auth = b'Basic ' + base64.encodebytes(auth.encode('utf-8'))[:-1]
         request.add_header('Authorization', auth)
 
         try:
             fd = urlopen(request)
-        except HTTPError as e:
-            raise FMError(str(e))
-        except URLError as e:
-            raise FMError('URL Error: %s' % str(e.reason))
+        except HTTPError as exc:
+            raise FMError(str(exc))
+        except URLError as exc:
+            raise FMError(f'URL Error: {exc.reason}')
 
         results = FMPXMLResult()
         results.httpinfo = fd.info()
@@ -365,7 +361,7 @@ class FM():
         # hide logon information
         # if self._dbuser and self._dbpasswd:
         #     results.url = results.url.replace(
-        #         "//", "//%s:%s@" % (self._dbuser, self._dbpasswd), 1)
+        #         "//", f"//{self._dbuser}:{self._dbpasswd}@", 1)
         root = etree.parse(fd).getroot()
         fd.close()
 
@@ -393,8 +389,10 @@ class FM():
         # <RESULTSET>
         escrslt = self._escrslt
         for row in root[4]:
-            record = {'MODID': int(row.attrib['MODID']),
-                      'RECORDID': int(row.attrib['RECORDID'])}
+            record = {
+                'MODID': int(row.attrib['MODID']),
+                'RECORDID': int(row.attrib['RECORDID'])
+            }
             for md, cn in zip(metadata, row.iterchildren()):
                 if escrslt and md.dtype == str:
                     convert_type = escape_unicode
@@ -417,7 +415,7 @@ class FM():
         return results
 
 
-class FMPXMLResult():
+class FMPXMLResult:
     """Result of FileMaker XML publishing interface query.
 
     Attributes
@@ -427,7 +425,7 @@ class FMPXMLResult():
         Records are stored as dictionaries {'database field name': value}.
         String character encoding is UTF-8.
     errorcode : int
-        Error code number as specified in FMError.codes.
+        Error code number as specified in FMError.CODES.
     metadata : list
         Sequence of FMField objects.
     httpinfo : str
@@ -440,8 +438,11 @@ class FMPXMLResult():
         URL used to query FileMaker XML interface.
 
     """
-    __slots__ = ('resultset', 'metadata', 'product', 'database', 'url',
-                 'httpinfo', 'errorcode')
+
+    __slots__ = (
+        'resultset', 'metadata', 'product', 'database', 'url', 'httpinfo',
+        'errorcode'
+    )
 
     def __init__(self):
         self.resultset = []
@@ -456,20 +457,21 @@ class FMPXMLResult():
         """Return string with info about FMPXMLResult."""
         return '\n\n'.join((
             'FMPXMLResult',
-            'URL = %s' % self.url,
-            'HTTPINFO =\n%s' % str(self.httpinfo).strip(),
-            'ERRORCODE = %i <%s>' % (
-                self.errorcode, FMError.codes[self.errorcode]),
-            'PRODUCT = %s' % self.product,
-            'DATABASE = %s' % self.database,
-            'METADATA = [\n %s\n]' % (
+            'URL = {}'.format(self.url),
+            'HTTPINFO =\n{}'.format(str(self.httpinfo).strip()),
+            'ERRORCODE = {} <{}>'.format(
+                self.errorcode, FMError.CODES[self.errorcode]),
+            'PRODUCT = {}'.format(self.product),
+            'DATABASE = {}'.format(self.database),
+            'METADATA = [\n {}\n]'.format(
                 '\n '.join(str(s) for s in self.metadata)),
-            'RESULTSET = %s' % (
-                ('[\n %s\n]' % ('\n '.join(str(s) for s in self.resultset)))
+            'RESULTSET = {}'.format(
+                ('[\n {}\n]'.format(
+                    '\n '.join(str(s) for s in self.resultset)))
                 if self.resultset else '[]')))
 
 
-class FMField():
+class FMField:
     """Attributes of FileMaker metadata field.
 
     Attributes
@@ -484,9 +486,10 @@ class FMField():
         Number of repetitions defined for field.
 
     """
-    __slots__ = 'name', 'maxrepeat', 'emptyok', 'dtype'
 
-    dtypes = {  # map FileMaker(tm) to Python types
+    __slots__ = ('name', 'maxrepeat', 'emptyok', 'dtype')
+
+    DTYPES = {  # map FileMaker(tm) to Python types
         'NUMBER': str,
         'TEXT': str,
         'DATE': str,
@@ -494,7 +497,8 @@ class FMField():
         'TIMESTAMP': str,
         'CONTAINER': str,
         'CALCULATION': str,
-        'SUMMARY': str}
+        'SUMMARY': str,
+    }
 
     def __init__(self, attributes):
         # <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="NAME" TYPE="TEXT"/>
@@ -502,12 +506,12 @@ class FMField():
         self.maxrepeat = int(attributes['MAXREPEAT'])
         self.emptyok = attributes['EMPTYOK'] == 'YES'
         try:
-            self.dtype = FMField.dtypes[attributes['TYPE']]
+            self.dtype = FMField.DTYPES[attributes['TYPE']]
         except KeyError:
             self.dtype = str
 
     def __str__(self):
-        return "FMField name='%s' dtype=%s maxrepeat=%i emptyok=%s" % (
+        return "FMField name='{}' dtype={} maxrepeat={} emptyok={}".format(
             self.name, self.dtype, self.maxrepeat, self.emptyok)
 
     def __repr__(self):
@@ -525,7 +529,8 @@ class FMError(Exception):
         Error code number.
 
     """
-    codes = {
+
+    CODES = {
         -1: 'Unknown error',
         0: 'No error',
         1: 'User canceled action',
@@ -790,8 +795,8 @@ class FMError(Exception):
         """Initialize Exception from message of FileMaker error code."""
         if isinstance(error, int):
             self.code = error
-            message = self.codes.get(self.code, 'Unknown error code')
-            error = 'FileMaker Error %i: %s' % (self.code, message)
+            message = FMError.CODES.get(self.code, 'Unknown error code')
+            error = f'FileMaker Error {self.code}: {message}'
         else:
             self.code = -1
         super().__init__(error)
@@ -805,4 +810,5 @@ def escape_unicode(ustr, quote=True):
 
 if __name__ == '__main__':
     import doctest
+
     doctest.testmod()

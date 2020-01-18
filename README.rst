@@ -12,31 +12,34 @@ via the XML publishing interface.
 :Organization:
   Laboratory for Fluorescence Dynamics. University of California, Irvine
 
-:Version: 2019.1.1
+:License: BSD 3-Clause
+
+:Version: 2020.1.1
 
 Requirements
 ------------
-* `CPython 3.5+ <https://www.python.org>`_
-* `FileMaker(tm) Server 8 Advanced <https://www.filemaker.com>`_
+* `CPython >= 3.6 <https://www.python.org>`_
 * `lxml 4.2 <https://github.com/lxml/lxml>`_
+* `FileMaker(tm) Server 8 Advanced <https://www.filemaker.com>`_
 
 Revisions
 ---------
-2019.1.1
-    Update copyright year.
+2020.1.1
+    Remove support for Python 3.5.
+    Update copyright.
 2018.8.15
     Move fmkr.py into fmkr package.
 2018.5.25
     Use lxml instead of minidom to parse FMPXMLResult.
     Improve string representations of FMPXMLResult and FMField.
     Update error codes.
-    Drop support for Python 2.
+    Remove support for Python 2.
 2006.10.30
     Initial release.
 
 References
 ----------
-(1) http://www.filemaker.com/downloads/documentation/fmsa8_custom_web_guide.pdf
+1. http://www.filemaker.com/downloads/documentation/fmsa8_custom_web_guide.pdf
 
 Examples
 --------
@@ -64,6 +67,6 @@ John Doe
 >>> try:
 ...    fmi.add_db_param('LAST', 'Doe', 'cn')
 ...    fmi.fm_find()
-... except FMError as e:
-...    print(e)
+... except FMError as exc:
+...    print(exc)
 FileMaker Error 401: No records match the request

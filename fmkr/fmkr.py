@@ -1,6 +1,6 @@
 # fmkr.py
 
-# Copyright (c) 2006-2020, Christoph Gohlke
+# Copyright (c) 2006-2021, Christoph Gohlke
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ via the XML publishing interface.
 
 :License: BSD 3-Clause
 
-:Version: 2020.1.1
+:Version: 2021.3.6
 
 Requirements
 ------------
@@ -54,6 +54,8 @@ Requirements
 
 Revisions
 ---------
+2021.3.6
+    Update copyright and formatting.
 2020.1.1
     Remove support for Python 3.5.
     Update copyright.
@@ -103,7 +105,7 @@ FileMaker Error 401: No records match the request
 
 """
 
-__version__ = '2020.1.1'
+__version__ = '2021.3.6'
 
 __all__ = ('FM', 'FMError', 'FMField', 'FMPXMLResult')
 
@@ -345,7 +347,7 @@ class FM:
         request.add_header('User-Agent', b'Fmkr.py')
         # authorization header
         auth = f'{self._dbuser}:{self._dbpasswd}'
-        auth = b'Basic ' + base64.encodebytes(auth.encode('utf-8'))[:-1]
+        auth = b'Basic ' + base64.encodebytes(auth.encode())[:-1]
         request.add_header('Authorization', auth)
 
         try:
@@ -391,7 +393,7 @@ class FM:
         for row in root[4]:
             record = {
                 'MODID': int(row.attrib['MODID']),
-                'RECORDID': int(row.attrib['RECORDID'])
+                'RECORDID': int(row.attrib['RECORDID']),
             }
             for md, cn in zip(metadata, row.iterchildren()):
                 if escrslt and md.dtype == str:
@@ -440,8 +442,13 @@ class FMPXMLResult:
     """
 
     __slots__ = (
-        'resultset', 'metadata', 'product', 'database', 'url', 'httpinfo',
-        'errorcode'
+        'resultset',
+        'metadata',
+        'product',
+        'database',
+        'url',
+        'httpinfo',
+        'errorcode',
     )
 
     def __init__(self):
@@ -455,20 +462,30 @@ class FMPXMLResult:
 
     def __str__(self):
         """Return string with info about FMPXMLResult."""
-        return '\n\n'.join((
-            'FMPXMLResult',
-            'URL = {}'.format(self.url),
-            'HTTPINFO =\n{}'.format(str(self.httpinfo).strip()),
-            'ERRORCODE = {} <{}>'.format(
-                self.errorcode, FMError.CODES[self.errorcode]),
-            'PRODUCT = {}'.format(self.product),
-            'DATABASE = {}'.format(self.database),
-            'METADATA = [\n {}\n]'.format(
-                '\n '.join(str(s) for s in self.metadata)),
-            'RESULTSET = {}'.format(
-                ('[\n {}\n]'.format(
-                    '\n '.join(str(s) for s in self.resultset)))
-                if self.resultset else '[]')))
+        return '\n\n'.join(
+            (
+                'FMPXMLResult',
+                'URL = {}'.format(self.url),
+                'HTTPINFO =\n{}'.format(str(self.httpinfo).strip()),
+                'ERRORCODE = {} <{}>'.format(
+                    self.errorcode, FMError.CODES[self.errorcode]
+                ),
+                'PRODUCT = {}'.format(self.product),
+                'DATABASE = {}'.format(self.database),
+                'METADATA = [\n {}\n]'.format(
+                    '\n '.join(str(s) for s in self.metadata)
+                ),
+                'RESULTSET = {}'.format(
+                    (
+                        '[\n {}\n]'.format(
+                            '\n '.join(str(s) for s in self.resultset)
+                        )
+                    )
+                    if self.resultset
+                    else '[]'
+                ),
+            )
+        )
 
 
 class FMField:
@@ -512,7 +529,8 @@ class FMField:
 
     def __str__(self):
         return "FMField name='{}' dtype={} maxrepeat={} emptyok={}".format(
-            self.name, self.dtype, self.maxrepeat, self.emptyok)
+            self.name, self.dtype, self.maxrepeat, self.emptyok
+        )
 
     def __repr__(self):
         return str(self)
@@ -536,10 +554,10 @@ class FMError(Exception):
         1: 'User canceled action',
         2: 'Memory error',
         3: 'Command is unavailable (for example, wrong operating system, '
-           'wrong mode, etc.)',
+        'wrong mode, etc.)',
         4: 'Command is unknown',
         5: 'Command is invalid (for example, a Set Field script step does '
-           'not have a calculation specified)',
+        'not have a calculation specified)',
         6: 'File is read-only',
         7: 'Running out of memory',
         8: 'Empty result',
@@ -575,14 +593,14 @@ class FMError(Exception):
         201: 'Field cannot be modified',
         202: 'Field access is denied',
         203: 'No records in file to print, or password doesn\'t allow print '
-             'access',
+        'access',
         204: 'No access to field(s) in sort order',
         205: 'User does not have access privileges to create new records; '
-             'import will overwrite existing data',
+        'import will overwrite existing data',
         206: 'User does not have password change privileges, or file is '
-             'not modifiable',
+        'not modifiable',
         207: 'User does not have sufficient privileges to change database '
-             'schema, or file is not modifiable',
+        'schema, or file is not modifiable',
         208: 'Password does not contain enough characters',
         209: 'New password must be different from existing one',
         210: 'User account is inactive',
@@ -593,7 +611,7 @@ class FMError(Exception):
         215: 'Administrator privileges cannot be duplicated',
         216: 'Guest account cannot be duplicated',
         217: 'User does not have sufficient privileges to modify '
-             'administrator account',
+        'administrator account',
         300: 'File is locked or in use',
         301: 'Record is in use by another user',
         302: 'Table is in use by another user',
@@ -604,10 +622,10 @@ class FMError(Exception):
         401: 'No records match the request',
         402: 'Selected field is not a match field for a lookup',
         403: 'Exceeding maximum record limit for trial version of '
-             'FileMaker(tm)) Pro',
+        'FileMaker(tm)) Pro',
         404: 'Sort order is invalid',
         405: 'Number of records specified exceeds number of records that '
-             'can be omitted',
+        'can be omitted',
         406: 'Replace/Reserialize criteria are invalid',
         407: 'One or both match fields are missing (invalid relationship)',
         408: 'Specified field has inappropriate data type for this operation',
@@ -621,15 +639,15 @@ class FMError(Exception):
         501: 'Time value does not meet validation entry options',
         502: 'Number value does not meet validation entry options',
         503: 'Value in field is not within the range specified in '
-             'validation entry options',
+        'validation entry options',
         504: 'Value in field is not unique as required in validation '
-             'entry options',
+        'entry options',
         505: 'Value in field is not an existing value in the database '
-             'file as required in validation entry options',
+        'file as required in validation entry options',
         506: 'Value in field is not listed on the value list specified '
-             'in validation entry option',
+        'in validation entry option',
         507: 'Value in field failed calculation test of validation entry '
-             'option',
+        'option',
         508: 'Invalid value entered in Find mode',
         509: 'Field requires a valid value',
         510: 'Related value is empty or unavailable',
@@ -642,42 +660,42 @@ class FMError(Exception):
         706: 'EPSF file has no preview image',
         707: 'Graphic translator cannot be found',
         708: 'Can\'t import the file or need color monitor support to '
-             'import file',
+        'import file',
         709: 'QuickTime movie import failed',
         710: 'Unable to update QuickTime file reference because the '
-             'database file is read-only',
+        'database file is read-only',
         711: 'Import translator cannot be found',
         714: 'Password privileges do not allow the operation',
         715: 'Specified Excel worksheet or named range is missing',
         716: 'A SQL query using DELETE, INSERT, or UPDATE is not allowed '
-             'for ODBC import',
+        'for ODBC import',
         717: 'There is not enough XML/XSL information to proceed with the '
-             'import or export',
+        'import or export',
         718: 'Error in parsing XML file (from Xerces)',
         719: 'Error in transforming XML using XSL (from Xalan)',
         720: 'Error when exporting; intended format does not support '
-             'repeating fields',
+        'repeating fields',
         721: 'Unknown error occurred in the parser or the transformer',
         722: 'Cannot import data into a file that has no fields',
         723: 'You do not have permission to add records to or modify '
-             'records in the target table',
+        'records in the target table',
         724: 'You do not have permission to add records to the target table',
         725: 'You do not have permission to modify records in the '
-             'target table',
+        'target table',
         726: 'There are more records in the import file than in the '
-             'target table. Not all records were imported',
+        'target table. Not all records were imported',
         727: 'There are more records in the target table than in the '
-             'import file. Not all records were updated',
+        'import file. Not all records were updated',
         729: 'Errors occurred during import. Records could not be imported',
         730: 'Unsupported Excel version. (Convert file to Excel 7.0 '
-             '(Excel 95), Excel 97, 2000, or XP format and try again)',
+        '(Excel 95), Excel 97, 2000, or XP format and try again)',
         731: 'The file you are importing from contains no data',
         732: 'This file cannot be inserted because it contains other files',
         733: 'A table cannot be imported into itself',
         734: 'This file type cannot be displayed as a picture',
         735: 'This file type cannot be displayed as a picture. It will be '
-             'inserted and displayed as a file 800 Unable to create file '
-             'on disk',
+        'inserted and displayed as a file 800 Unable to create file '
+        'on disk',
         801: 'Unable to create temporary file on System disk',
         802: 'Unable to open file',
         803: 'File is single user or host cannot be found',
@@ -705,20 +723,20 @@ class FMError(Exception):
         902: 'Could not launch the Help system',
         903: 'Command cannot be used in a shared file',
         904: 'Command can only be used in a file hosted under '
-             'FileMaker(tm) Server',
+        'FileMaker(tm) Server',
         905: 'No active field selected; command can only be used if there '
-             'is an active field',
+        'is an active field',
         920: 'Can\'t initialize the spelling engine',
         921: 'User dictionary cannot be loaded for editing',
         922: 'User dictionary cannot be found',
         923: 'User dictionary is read-only',
         951: 'An unexpected error occurred (returned only by '
-             'web-published databases)',
+        'web-published databases)',
         954: 'Unsupported XML grammar (returned only by '
-             'web-published databases)',
+        'web-published databases)',
         955: 'No database name (returned only by web-published databases)',
         956: 'Maximum number of database sessions exceeded (returned '
-             'only by web-published databases)',
+        'only by web-published databases)',
         957: 'Conflicting commands (returned only by web-published databases)',
         958: 'Parameter missing (returned only by web-published databases)',
         971: 'The user name is invalid',
@@ -744,8 +762,8 @@ class FMError(Exception):
         1212: 'An operator (for example, +, -, *) is expected here',
         1213: 'This variable has already been defined in the Let function',
         1214: 'AVERAGE, COUNT, EXTEND, GETREPETITION, MAX, MIN, NPV, '
-              'STDEV, SUM and GETSUMMARY: expression found where a field '
-              'alone is needed',
+        'STDEV, SUM and GETSUMMARY: expression found where a field '
+        'alone is needed',
         1215: 'This parameter is an invalid Get function parameter',
         1216: 'Only Summary fields allowed as first argument in GETSUMMARY',
         1217: 'Break field is invalid',
@@ -756,7 +774,7 @@ class FMError(Exception):
         1222: 'Calculation cannot be stored',
         1223: 'The function referred to does not exist',
         1400: 'ODBC driver initialization failed; make sure the ODBC '
-              'drivers are properly installed',
+        'drivers are properly installed',
         1401: 'Failed to allocate environment (ODBC)',
         1402: 'Failed to free environment (ODBC)',
         1403: 'Failed to disconnect (ODBC)',
@@ -778,7 +796,7 @@ class FMError(Exception):
         1507: 'Unable to log in to the SMTP server',
         1550: 'Cannot load the plug-in, or the plug-in is not a valid plug-in',
         1551: 'Cannot install the plug-in; cannot delete an existing plug-in '
-              'or write to the folder or disk',
+        'or write to the folder or disk',
         1626: 'Protocol is not supported',
         1627: 'Authentication failed',
         1628: 'There was an error with SSL',
@@ -786,9 +804,9 @@ class FMError(Exception):
         1630: 'URL format is incorrect',
         1631: 'Connection failed',
         1632: 'Certificate cannot be authenticated by a supported '
-              'certificate authority',
+        'certificate authority',
         1633: 'Certificate is valid but still causes an error '
-              '(for example, the certificate has expired)',
+        '(for example, the certificate has expired)',
     }
 
     def __init__(self, error=-1):
@@ -804,8 +822,12 @@ class FMError(Exception):
 
 def escape_unicode(ustr, quote=True):
     """Return ASCII string for use in XHTML from unicode string."""
-    return escape(ustr.strip(), quote=quote).encode(
-        'ascii', 'xmlcharrefreplace').replace(b"'", b'&#39;').decode('ascii')
+    return (
+        escape(ustr.strip(), quote=quote)
+        .encode('ascii', 'xmlcharrefreplace')
+        .replace(b"'", b'&#39;')
+        .decode('ascii')
+    )
 
 
 if __name__ == '__main__':

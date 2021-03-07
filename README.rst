@@ -14,7 +14,7 @@ via the XML publishing interface.
 
 :License: BSD 3-Clause
 
-:Version: 2020.1.1
+:Version: 2021.3.6
 
 Requirements
 ------------
@@ -24,6 +24,8 @@ Requirements
 
 Revisions
 ---------
+2021.3.6
+    Update copyright and formatting.
 2020.1.1
     Remove support for Python 3.5.
     Update copyright.

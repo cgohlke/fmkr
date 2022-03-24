@@ -15,7 +15,7 @@ version = re.search(r"__version__ = '(.*?)'", code).groups()[0]
 description = re.search(r'"""(.*)\.(?:\r\n|\r|\n)', code).groups()[0]
 
 readme = re.search(
-    r'(?:\r\n|\r|\n){2}"""(.*)"""(?:\r\n|\r|\n){2}__version__',
+    r'(?:\r\n|\r|\n){2}"""(.*)"""(?:\r\n|\r|\n){2}[__version__|from]',
     code,
     re.MULTILINE | re.DOTALL,
 ).groups()[0]
@@ -54,7 +54,7 @@ setup(
     },
     packages=['fmkr'],
     install_requires=['lxml>=4.2'],
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     license='BSD',
     platforms=['any'],
     classifiers=[
@@ -64,9 +64,8 @@ setup(
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
 )

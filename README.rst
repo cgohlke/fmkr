@@ -4,7 +4,7 @@ Access FileMaker(tm) Server Databases
 Fmkr is a Python library to access FileMaker(tm) Server 8 Advanced databases
 via the XML publishing interface.
 
-"FileMaker" is a registered trademark of FileMaker Inc.
+"FileMaker" is a registered trademark of Claris International Inc.
 
 :Author:
   `Christoph Gohlke <https://www.lfd.uci.edu/~gohlke/>`_
@@ -14,16 +14,24 @@ via the XML publishing interface.
 
 :License: BSD 3-Clause
 
-:Version: 2021.3.6
+:Version: 2022.3.24
 
 Requirements
 ------------
-* `CPython >= 3.6 <https://www.python.org>`_
-* `lxml 4.2 <https://github.com/lxml/lxml>`_
-* `FileMaker(tm) Server 8 Advanced <https://www.filemaker.com>`_
+This release has been tested with the following requirements and dependencies
+(other versions may work):
+
+* `CPython 3.8.10, 3.9.12, 3.10.4 64-bit <https://www.python.org>`_
+* `Lxml 4.8.0 <https://pypi.org/project/lxml/>`_
+* `FileMaker(tm) Server 8 Advanced <https://www.claris.com/filemaker/>`_
 
 Revisions
 ---------
+2022.3.24
+    Add type hints.
+    Improve string representations of objects.
+    Add immutable sequence interface to FMPXMLResult.
+    Remove support for Python 3.6 and 3.7 (NEP 29).
 2021.3.6
     Update copyright and formatting.
 2020.1.1
@@ -58,11 +66,11 @@ Examples
 >>> fmi.add_sort_param('LAST', 'ascend', 1)
 >>> fmi.add_sort_param('FIRST', 'ascend', 2)
 >>> result = fmi.fm_find()
->>> for record in result.resultset:
+>>> for record in result:
 ...     print(record['FIRST'], record['LAST'])
 John Doe
 >>> # delete record
->>> recid = result.resultset[0]['RECORDID']
+>>> recid = result[0]['RECORDID']
 >>> fmi.set_record_id(recid)
 >>> fmi.fm_delete()
 >>> # catch an exception

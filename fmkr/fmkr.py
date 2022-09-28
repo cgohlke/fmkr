@@ -36,53 +36,66 @@ via the XML publishing interface.
 
 "FileMaker" is a registered trademark of Claris International Inc.
 
-:Author:
-  `Christoph Gohlke <https://www.lfd.uci.edu/~gohlke/>`_
-
-:Organization:
-  Laboratory for Fluorescence Dynamics. University of California, Irvine
-
+:Author: `Christoph Gohlke <https://www.cgohlke.com>`_
 :License: BSD 3-Clause
-
-:Version: 2022.3.24
+:Version: 2022.9.28
 
 Requirements
 ------------
+
 This release has been tested with the following requirements and dependencies
 (other versions may work):
 
-* `CPython 3.8.10, 3.9.12, 3.10.4 64-bit <https://www.python.org>`_
-* `Lxml 4.8.0 <https://pypi.org/project/lxml/>`_
-* `FileMaker(tm) Server 8 Advanced <https://www.claris.com/filemaker/>`_
+- `CPython 3.8.10, 3.9.13, 3.10.7, 3.11.0rc2 <https://www.python.org>`_
+- `Lxml 4.9.1 <https://pypi.org/project/lxml/>`_
+- `FileMaker(tm) Server 8 Advanced <https://www.claris.com/filemaker/>`_
 
 Revisions
 ---------
+
+2022.9.28
+
+- Convert docstrings to Google style with Sphinx directives.
+
 2022.3.24
-    Add type hints.
-    Improve string representations of objects.
-    Add immutable sequence interface to FMPXMLResult.
-    Remove support for Python 3.6 and 3.7 (NEP 29).
+
+- Add type hints.
+- Improve string representations of objects.
+- Add immutable sequence interface to FMPXMLResult.
+- Remove support for Python 3.6 and 3.7 (NEP 29).
+
 2021.3.6
-    Update copyright and formatting.
+
+- Update copyright and formatting.
+
 2020.1.1
-    Remove support for Python 3.5.
-    Update copyright.
+
+- Remove support for Python 3.5.
+- Update copyright.
+
 2018.8.15
-    Move fmkr.py into fmkr package.
+
+- Move fmkr.py into fmkr package.
+
 2018.5.25
-    Use lxml instead of minidom to parse FMPXMLResult.
-    Improve string representations of FMPXMLResult and FMField.
-    Update error codes.
-    Remove support for Python 2.
+
+- Use lxml instead of minidom to parse FMPXMLResult.
+- Improve string representations of FMPXMLResult and FMField.
+- Update error codes.
+- Remove support for Python 2.
+
 2006.10.30
-    Initial release.
+
+- Initial release.
 
 References
 ----------
+
 1. http://www.filemaker.com/downloads/documentation/fmsa8_custom_web_guide.pdf
 
 Examples
 --------
+
 >>> from fmkr import FM, FMError
 >>> fmi = FM('filemaker.domain.com', 80, 'http')
 >>> fmi.set_db_data('database', 'layout', maxret=5)
@@ -115,7 +128,7 @@ FileMaker Error 401: No records match the request
 
 from __future__ import annotations
 
-__version__ = '2022.3.24'
+__version__ = '2022.9.28'
 
 __all__ = ['FM', 'FMError', 'FMField', 'FMPXMLResult']
 
@@ -130,7 +143,19 @@ from lxml import etree
 
 
 class FM:
-    """FileMaker Server 8 Advanced XML publishing interface."""
+    """FileMaker Server 8 Advanced XML publishing interface.
+
+    Parameters:
+        server:
+            IP address or domain name of FileMaker Web server.
+        port:
+            TCP/IP port number used by FileMaker Web server.
+            The default is 80.
+        protocol:
+            Protocol used by FileMaker Web server.
+            'http' (default) or 'https'.
+
+    """
 
     URL = '{_protocol}://{_server}:{_port}/fmi/xml/FMPXMLRESULT.xml'
 
@@ -146,20 +171,8 @@ class FM:
     _maxret: int
 
     def __init__(
-        self, server: str, port: int = 80, protocol: str = 'http'
+        self, server: str, /, port: int = 80, protocol: str = 'http'
     ) -> None:
-        """Specify location of the FileMaker XML publishing interface.
-
-        Parameters
-        ----------
-        server : str
-            IP address or domain name of FileMaker Web server.
-        port : int
-            TCP/IP port number used by FileMaker Web server (default: 80).
-        protocol : str
-            'http' (default) or 'https'.
-
-        """
         self._server = str(server)
         self._port = int(port)
         self._protocol = str(protocol)
@@ -172,20 +185,20 @@ class FM:
         self._maxret = 50
 
     def set_db_data(
-        self, name: str, layout: str, maxret: int = 50, response: str = None
+        self, name: str, layout: str, /, maxret: int = 50, response: str = None
     ) -> None:
         """Specify database and layout to be accessed.
 
-        Parameters
-        ----------
-        name : str
-            Name of database to be accessed.
-        layout : str
-            Name of layout to be accessed.
-        maxret : int
-            Optional maximum number of records returned by query. Default 50.
-        response : str
-            Optional name of response layout.
+        Parameters:
+            name:
+                Name of database to be accessed.
+            layout:
+                Name of layout to be accessed.
+            maxret:
+                Optional maximum number of records returned by query.
+                The default is 50.
+            response:
+                Optional name of response layout.
 
         """
         self._dbdata = []
@@ -195,32 +208,31 @@ class FM:
             self._dbdata_append(('-lay.response', response))
         self._maxret = maxret
 
-    def set_db_password(self, username: str, password: str) -> None:
+    def set_db_password(self, username: str, password: str, /) -> None:
         """Specify credentials for accessing database.
 
-        Parameters
-        ----------
-        username : str
-            User name for FileMaker authentication.
-        password : str
-            Password associated with user.
+        Parameters:
+            username:
+                User name for FileMaker authentication.
+            password:
+                Password associated with user.
 
         """
         self._dbuser = str(username)
         self._dbpasswd = str(password)
 
-    def set_script(self, name: str, option: str | None = None) -> None:
+    def set_script(self, name: str, /, option: str | None = None) -> None:
         """Specify script to be performed on returned data set.
 
-        Parameters
-        ----------
-        name : str
-            FileMaker script name.
-        option : str
-            Specify when script is to be executed.
-            None : Execute script after find and sort (default).
-            'prefind' : Execute script before find and sort.
-            'presort' : Execute script after find, before sort.
+        Parameters:
+            name:
+                FileMaker script name.
+            option:
+                Specify when script is to be executed:
+
+                - None: Execute script after find and sort (default).
+                - 'prefind': Execute script before find and sort.
+                - 'presort': Execute script after find, before sort.
 
         """
         key = '-script'
@@ -228,15 +240,24 @@ class FM:
             key += '.' + option
         self._dbparams_append((key, name))
 
-    def set_record_id(self, recid: int) -> None:
-        """Specify ID of record to be edited or deleted."""
+    def set_record_id(self, recid: int, /) -> None:
+        """Specify ID of record to be edited or deleted.
+
+        Parameters:
+            recid: ID of record to be edited or deleted.
+
+        """
         self._dbparams_append(('-recid', recid))
 
-    def set_modifier_id(self, modid: int) -> None:
+    def set_modifier_id(self, modid: int, /) -> None:
         """Specify modifier ID of record to be changed.
 
-        Exception #306 will be raised if data being submitted is older
-        than existing one.
+        Parameters:
+            modid: Modifier ID of record to be changed.
+
+        Raises:
+            :py:class:`FMError` #306:
+                Data being submitted is older than existing one.
 
         """
         self._dbparams_append(('-modid', modid))
@@ -249,67 +270,89 @@ class FM:
         """
         self._dbparams_append(('-lop', 'or'))
 
-    def set_group_size(self, maxret: int) -> None:
-        """Specify maximum number of records to be returned."""
+    def set_group_size(self, maxret: int, /) -> None:
+        """Specify maximum number of records to be returned.
+
+        Parameters:
+            maxret: Maximum number of records to be returned.
+
+        """
         self._maxret = int(maxret)
 
-    def set_skip_records(self, skip: int) -> None:
-        """Specify index of first record to be returned."""
+    def set_skip_records(self, skip: int, /) -> None:
+        """Specify index of first record to be returned.
+
+        Parameters:
+            skip: Index of first record to be returned.
+
+        """
         if int(skip):
             self._dbparams_append(('-skip', int(skip)))
 
-    def set_escape(self, value: bool = True) -> None:
-        """Specify to escape and encode all u'TEXT' types in result records."""
+    def set_escape(self, value: bool = True, /) -> None:
+        """Specify to escape and encode all u'TEXT' types in result records.
+
+        Parameters:
+            value: Escape and encode all u'TEXT' types in result records.
+
+        """
         self._escrslt = bool(value)
 
-    def add_db_param(self, field: str, value: Any, op: str = None) -> None:
+    def add_db_param(self, field: str, value: Any, /, op: str = None) -> None:
         """Specify field data and query criteria. May be called multiple times.
 
-        Parameters
-        ----------
-        field : str
-            Name of field to update or query against.
-        value : various types
-            Value of field.
-        op : str
-            Optional operator used to compare data at field level.
-            'eq' : equals
-            'cn' : contains
-            'bw' : begins with (default)
-            'ew' : ends with
-            'gt' : greater than
-            'gte' : greater than or equal to
-            'lt' : less than
-            'lte' : less than or equal to
-            'neq' : not equal to
+        Parameters:
+
+            field:
+                Name of field to update or query against.
+            value:
+                Value of field.
+            op:
+                Optional operator used to compare data at field level:
+
+                - 'eq': equals
+                - 'cn': contains
+                - 'bw': begins with (default)
+                - 'ew': ends with
+                - 'gt': greater than
+                - 'gte': greater than or equal to
+                - 'lt': less than
+                - 'lte': less than or equal to
+                - 'neq': not equal to
 
         """
         self._dbparams_append((field, value))
         if op:
             self._dbparams_append((f'{field}.op', op))
 
-    def add_db_params(self, fieldvalues: Iterable[tuple[str, Any]]) -> None:
-        """Specify multiple parameters using sequence of (field, value)."""
+    def add_db_params(self, fieldvalues: Iterable[tuple[str, Any]], /) -> None:
+        """Specify multiple parameters using sequence of (field, value).
+
+        Parameters:
+            fieldvalues: Sequence of parameters as (field, value) tuple.
+
+        """
         for item in fieldvalues:
             self.add_db_param(*item)
 
     def add_sort_param(
-        self, field: str, order: str = 'ascend', priority: int = 0
+        self, field: str, /, order: str = 'ascend', priority: int = 0
     ) -> None:
         """Specify how found records will be sorted.
 
-        Parameters
-        ----------
-        field : str
-            Name of field to sort by.
-        order : str
-            Sort order.
-            'ascend': Ascending (default).
-            'descend': Descending.
-            'custom': Name of a value list.
-        priority : int
-            Integer value to place multiple sort requests in a
-            specified order (default: 0).
+        Parameters:
+
+            field:
+                Name of field to sort by.
+            order:
+                Sort order:
+
+                - 'ascend': Ascending (default).
+                - 'descend': Descending.
+                - 'custom': Name of a value list.
+            priority:
+                Integer value to place multiple sort requests in a
+                specified order. The default is 0.
 
         """
         self._dbparams_append((f'-sortfield.{priority}', field))
@@ -351,15 +394,15 @@ class FM:
         """Delete given record."""
         return self._commit('delete')
 
-    def _dbparams_append(self, arg: tuple[str, Any]) -> None:
+    def _dbparams_append(self, arg: tuple[str, Any], /) -> None:
         """Append arg to _dbparams."""
         self._dbparams.append((arg[0], arg[1]))
 
-    def _dbdata_append(self, arg: tuple[str, Any]) -> None:
+    def _dbdata_append(self, arg: tuple[str, Any], /) -> None:
         """Append arg to _dbdata."""
         self._dbdata.append((arg[0], arg[1]))
 
-    def _commit(self, action: str) -> FMPXMLResult:
+    def _commit(self, action: str, /) -> FMPXMLResult:
         """Submit request to FileMaker XML publishing interface.
 
         Return FMPXMLResult instance.
@@ -445,7 +488,6 @@ class FM:
         return results
 
     def __repr__(self) -> str:
-        """Return string representation of FM instance."""
         params = urlencode(self._dbdata + self._dbparams)
         if params:
             params = '&' + params
@@ -456,28 +498,7 @@ class FM:
 
 
 class FMPXMLResult:
-    """Result of FileMaker XML publishing interface query.
-
-    Attributes
-    ----------
-    resultset : list
-        Sequence of records returned by FileMaker.
-        Records are stored as dictionaries {'database field name': value}.
-        String character encoding is UTF-8.
-    errorcode : int
-        Error code number as specified in FMError.CODES.
-    metadata : list
-        Sequence of FMField objects.
-    httpinfo : str
-        HTTP header string returned by FileMaker.
-    database : dict
-        Dictionary of FileMaker database information.
-    product : dict
-        Dictionary of FileMaker product information.
-    url : str
-        URL used to query FileMaker XML interface.
-
-    """
+    """Result of FileMaker XML publishing interface query."""
 
     __slots__ = (
         'resultset',
@@ -490,12 +511,23 @@ class FMPXMLResult:
     )
 
     resultset: list[dict[str, Any]]
+    """Sequence of records returned by FileMaker.
+
+    Records are stored as dictionaries {'database field name': value}.
+    String character encoding is UTF-8.
+    """
     metadata: list[FMField]
+    """Sequence of FMField objects."""
     product: dict[str, str]
+    """FileMaker product information."""
     database: dict[str, str]
+    """FileMaker database information"""
     url: str
+    """URL used to query FileMaker XML interface."""
     httpinfo: str
+    """HTTP header string returned by FileMaker."""
     errorcode: int
+    """Error code number as specified in :py:attr:`FMError` CODES."""
 
     def __init__(self) -> None:
         self.resultset = []
@@ -510,12 +542,11 @@ class FMPXMLResult:
         """Return number of records in resultset."""
         return len(self.resultset)
 
-    def __getitem__(self, key) -> dict[str, Any]:
+    def __getitem__(self, key, /) -> dict[str, Any]:
         """Return record from resultset."""
         return self.resultset[key]
 
     def __repr__(self) -> str:
-        """Return string representation of FMPXMLResult instance."""
         if self.errorcode:
             info = f' {FMError.CODES[self.errorcode]!r}'
         else:
@@ -523,7 +554,6 @@ class FMPXMLResult:
         return f'<{self.__class__.__name__} {info}>'
 
     def __str__(self) -> str:
-        """Return string with info about FMPXMLResult."""
         return indent(
             repr(self),
             f'url: {self.url}',
@@ -539,16 +569,8 @@ class FMPXMLResult:
 class FMField:
     """Attributes of FileMaker metadata field.
 
-    Attributes
-    ----------
-    name : str
-        Field name.
-    dtype : type
-        Field type.
-    emptyok : bool
-        Identifies whether field may be left empty.
-    maxrepeat : int
-        Number of repetitions defined for field.
+    Parameters:
+        attributes: Field attributes.
 
     """
 
@@ -567,11 +589,15 @@ class FMField:
     }
 
     name: str
-    maxrepeat: int
-    emptyok: bool
+    """Field name."""
     dtype: type
+    """Field type."""
+    emptyok: bool
+    """Field may be left empty."""
+    maxrepeat: int
+    """Number of repetitions defined for field."""
 
-    def __init__(self, attributes: dict[str, str]) -> None:
+    def __init__(self, attributes: dict[str, str], /) -> None:
         # <FIELD EMPTYOK="YES" MAXREPEAT="1" NAME="NAME" TYPE="TEXT"/>
         self.name = attributes['NAME']
         self.maxrepeat = int(attributes['MAXREPEAT'])
@@ -579,7 +605,6 @@ class FMField:
         self.dtype = FMField.DTYPES.get(attributes['TYPE'], str)
 
     def __repr__(self) -> str:
-        """Return string representation of FMField instance."""
         return (
             f'<{self.__class__.__name__} '
             f'name={self.name!r} dtype={self.dtype.__name__} '
@@ -590,12 +615,8 @@ class FMField:
 class FMError(Exception):
     """Exception to report FileMaker problems.
 
-    Attributes
-    ----------
-    message : unicode or str
-        Error message.
-    code : int
-        Error code number.
+    Parameters:
+        error: Error message or code.
 
     """
 
@@ -861,9 +882,9 @@ class FMError(Exception):
     }
 
     code: int
+    """Error code number."""
 
-    def __init__(self, error: str | int = -1):
-        """Initialize Exception from message of FileMaker error code."""
+    def __init__(self, error: str | int = -1, /):
         if isinstance(error, int):
             self.code = error
             message = FMError.CODES.get(self.code, 'Unknown error code')
@@ -873,8 +894,14 @@ class FMError(Exception):
         super().__init__(error)
 
 
-def escape_unicode(ustr: str, quote: bool = True) -> str:
-    """Return ASCII string for use in XHTML from unicode string."""
+def escape_unicode(ustr: str, /, quote: bool = True) -> str:
+    """Return ASCII string for use in XHTML from unicode string.
+
+    Parameters:
+        ustr: Unicode string to escape.
+        quote: Translate quotation mark characters.
+
+    """
     return (
         escape(ustr.strip(), quote=quote)
         .encode('ascii', 'xmlcharrefreplace')

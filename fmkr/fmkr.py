@@ -1,6 +1,6 @@
 # fmkr.py
 
-# Copyright (c) 2006-2022, Christoph Gohlke
+# Copyright (c) 2006-2026, Christoph Gohlke
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,21 +37,27 @@ via the XML publishing interface.
 "FileMaker" is a registered trademark of Claris International Inc.
 
 :Author: `Christoph Gohlke <https://www.cgohlke.com>`_
-:License: BSD 3-Clause
-:Version: 2022.9.28
+:License: BSD-3-Clause
+:Version: 2026.1.6
 
 Requirements
 ------------
 
-This release has been tested with the following requirements and dependencies
+This revision was tested with the following requirements and dependencies
 (other versions may work):
 
-- `CPython 3.8.10, 3.9.13, 3.10.7, 3.11.0rc2 <https://www.python.org>`_
-- `Lxml 4.9.1 <https://pypi.org/project/lxml/>`_
+- `CPython <https://www.python.org>`_ 3.11.9, 3.12.10, 3.13.11, 3.14.2
+- `Lxml <https://pypi.org/project/lxml/>`_ 6.0.2
 - `FileMaker(tm) Server 8 Advanced <https://www.claris.com/filemaker/>`_
 
 Revisions
 ---------
+
+2026.1.6
+
+- Improve code quality.
+- Support Python 3.12, 3.13, and 3.14.
+- Drop support for Python 3.8, 3.9, and 3.10.
 
 2022.9.28
 
@@ -62,7 +68,7 @@ Revisions
 - Add type hints.
 - Improve string representations of objects.
 - Add immutable sequence interface to FMPXMLResult.
-- Remove support for Python 3.6 and 3.7 (NEP 29).
+- Drop support for Python 3.6 and 3.7 (NEP 29).
 
 2021.3.6
 
@@ -70,7 +76,7 @@ Revisions
 
 2020.1.1
 
-- Remove support for Python 3.5.
+- Drop support for Python 3.5.
 - Update copyright.
 
 2018.8.15
@@ -82,7 +88,7 @@ Revisions
 - Use lxml instead of minidom to parse FMPXMLResult.
 - Improve string representations of FMPXMLResult and FMField.
 - Update error codes.
-- Remove support for Python 2.
+- Drop support for Python 2.
 
 2006.10.30
 
@@ -111,6 +117,7 @@ Examples
 >>> result = fmi.fm_find()
 >>> for record in result:
 ...     print(record['FIRST'], record['LAST'])
+...
 John Doe
 >>> # delete record
 >>> recid = result[0]['RECORDID']
@@ -118,26 +125,31 @@ John Doe
 >>> fmi.fm_delete()
 >>> # catch an exception
 >>> try:
-...    fmi.add_db_param('LAST', 'Doe', 'cn')
-...    fmi.fm_find()
+...     fmi.add_db_param('LAST', 'Doe', 'cn')
+...     fmi.fm_find()
 ... except FMError as exc:
-...    print(exc)
+...     print(exc)
+...
 FileMaker Error 401: No records match the request
 
 """
 
 from __future__ import annotations
 
-__version__ = '2022.9.28'
+__version__ = '2026.1.6'
 
 __all__ = ['FM', 'FMError', 'FMField', 'FMPXMLResult']
 
 import base64
 from html import escape
+from typing import TYPE_CHECKING
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
-from urllib.error import HTTPError, URLError
-from typing import Any, Iterable
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from typing import Any, ClassVar
 
 from lxml import etree
 
@@ -185,7 +197,12 @@ class FM:
         self._maxret = 50
 
     def set_db_data(
-        self, name: str, layout: str, /, maxret: int = 50, response: str = None
+        self,
+        name: str,
+        layout: str,
+        /,
+        maxret: int = 50,
+        response: str | None = None,
     ) -> None:
         """Specify database and layout to be accessed.
 
@@ -198,7 +215,7 @@ class FM:
                 Optional maximum number of records returned by query.
                 The default is 50.
             response:
-                Optional name of response layout.
+                Name of response layout.
 
         """
         self._dbdata = []
@@ -289,16 +306,20 @@ class FM:
         if int(skip):
             self._dbparams_append(('-skip', int(skip)))
 
-    def set_escape(self, value: bool = True, /) -> None:
-        """Specify to escape and encode all u'TEXT' types in result records.
+    def set_escape(
+        self, value: bool = True, /  # noqa: FBT001, FBT002
+    ) -> None:
+        """Specify to escape and encode all 'TEXT' types in result records.
 
         Parameters:
-            value: Escape and encode all u'TEXT' types in result records.
+            value: Escape and encode all 'TEXT' types in result records.
 
         """
         self._escrslt = bool(value)
 
-    def add_db_param(self, field: str, value: Any, /, op: str = None) -> None:
+    def add_db_param(
+        self, field: str, value: Any, /, op: str | None = None
+    ) -> None:
         """Specify field data and query criteria. May be called multiple times.
 
         Parameters:
@@ -308,7 +329,7 @@ class FM:
             value:
                 Value of field.
             op:
-                Optional operator used to compare data at field level:
+                Operator used to compare data at field level:
 
                 - 'eq': equals
                 - 'cn': contains
@@ -352,7 +373,7 @@ class FM:
                 - 'custom': Name of a value list.
             priority:
                 Integer value to place multiple sort requests in a
-                specified order. The default is 0.
+                specified order.
 
         """
         self._dbparams_append((f'-sortfield.{priority}', field))
@@ -414,7 +435,7 @@ class FM:
         data = urlencode(self._dbdata + self._dbparams) + '&-' + action
         self._dbparams = []
         # use POST to submit data
-        request = Request(url, data.encode('ascii'))
+        request = Request(url, data.encode('ascii'))  # noqa: S310
         request.add_header('User-Agent', 'Fmkr.py')
         # authorization header
         auth = f'{self._dbuser}:{self._dbpasswd}'
@@ -422,25 +443,25 @@ class FM:
         request.add_header('Authorization', auth)
 
         try:
-            fd = urlopen(request)
-        except HTTPError as exc:
-            raise FMError(str(exc))
-        except URLError as exc:
-            raise FMError(f'URL Error: {exc.reason}')
+            with urlopen(request) as fd:  # noqa: S310
+                results = FMPXMLResult()
+                results.httpinfo = fd.info()
+                results.url = url + '?' + data
+                # hide logon information
+                # if self._dbuser and self._dbpasswd:
+                #     results.url = results.url.replace(
+                #         "//", f"//{self._dbuser}:{self._dbpasswd}@", 1)
+                root = etree.parse(fd).getroot()
 
-        results = FMPXMLResult()
-        results.httpinfo = fd.info()
-        results.url = url + '?' + data
-        # hide logon information
-        # if self._dbuser and self._dbpasswd:
-        #     results.url = results.url.replace(
-        #         "//", f"//{self._dbuser}:{self._dbpasswd}@", 1)
-        root = etree.parse(fd).getroot()
-        fd.close()
+        except HTTPError as exc:
+            raise FMError(str(exc)) from exc
+        except URLError as exc:
+            msg = f'URL Error: {exc.reason}'
+            raise FMError(msg) from exc
 
         # <ERRORCODE>0</ERRORCODE>
         try:
-            results.errorcode = int(root[0].text)
+            results.errorcode = int(root[0].text)  # type: ignore[arg-type]
         except Exception:
             results.errorcode = -1
         if results.errorcode != 0:
@@ -448,16 +469,18 @@ class FM:
 
         # <PRODUCT BUILD="06/14/2006" NAME="FileMaker Web Publishing Engine"
         #          VERSION="8.0.4.128"/>
-        results.product.update(root[1].attrib)
+        results.product.update(root[1].attrib)  # type: ignore[arg-type]
 
         # <DATABASE DATEFORMAT="MM/dd/yyyy" LAYOUT="data entry"
         #           NAME="Test" RECORDS="68" TIMEFORMAT="HH:mm:ss"/>
-        results.database.update(root[2].attrib)
+        results.database.update(root[2].attrib)  # type: ignore[arg-type]
 
         # <METADATA>
-        metadata = results.metadata
-        for field in root[3]:
-            metadata.append(FMField(field.attrib))
+
+        results.metadata.extend(
+            FMField(field.attrib)  # type: ignore[arg-type]
+            for field in root[3]
+        )
 
         # <RESULTSET>
         escrslt = self._escrslt
@@ -466,7 +489,9 @@ class FM:
                 'MODID': int(row.attrib['MODID']),
                 'RECORDID': int(row.attrib['RECORDID']),
             }
-            for md, cn in zip(metadata, row.iterchildren()):
+            for md, cn in zip(
+                results.metadata, row.iterchildren(), strict=False
+            ):
                 if escrslt and md.dtype == str:
                     convert_type = escape_unicode
                 else:
@@ -501,13 +526,13 @@ class FMPXMLResult:
     """Result of FileMaker XML publishing interface query."""
 
     __slots__ = (
-        'resultset',
+        'database',
+        'errorcode',
+        'httpinfo',
         'metadata',
         'product',
-        'database',
+        'resultset',
         'url',
-        'httpinfo',
-        'errorcode',
     )
 
     resultset: list[dict[str, Any]]
@@ -518,14 +543,19 @@ class FMPXMLResult:
     """
     metadata: list[FMField]
     """Sequence of FMField objects."""
+
     product: dict[str, str]
     """FileMaker product information."""
+
     database: dict[str, str]
     """FileMaker database information"""
+
     url: str
     """URL used to query FileMaker XML interface."""
+
     httpinfo: str
     """HTTP header string returned by FileMaker."""
+
     errorcode: int
     """Error code number as specified in :py:attr:`FMError` CODES."""
 
@@ -542,7 +572,7 @@ class FMPXMLResult:
         """Return number of records in resultset."""
         return len(self.resultset)
 
-    def __getitem__(self, key, /) -> dict[str, Any]:
+    def __getitem__(self, key: int, /) -> dict[str, Any]:
         """Return record from resultset."""
         return self.resultset[key]
 
@@ -574,9 +604,9 @@ class FMField:
 
     """
 
-    __slots__ = ('name', 'maxrepeat', 'emptyok', 'dtype')
+    __slots__ = ('dtype', 'emptyok', 'maxrepeat', 'name')
 
-    DTYPES: dict[str, type] = {
+    DTYPES: ClassVar[dict[str, type]] = {
         # map FileMaker to Python types
         'NUMBER': str,
         'TEXT': str,
@@ -590,10 +620,13 @@ class FMField:
 
     name: str
     """Field name."""
+
     dtype: type
     """Field type."""
+
     emptyok: bool
     """Field may be left empty."""
+
     maxrepeat: int
     """Number of repetitions defined for field."""
 
@@ -612,7 +645,7 @@ class FMField:
         )
 
 
-class FMError(Exception):
+class FMError(ValueError):
     """Exception to report FileMaker problems.
 
     Parameters:
@@ -620,7 +653,7 @@ class FMError(Exception):
 
     """
 
-    CODES: dict[int, str] = {
+    CODES: ClassVar[dict[int, str]] = {
         -1: 'Unknown error',
         0: 'No error',
         1: 'User canceled action',
@@ -639,7 +672,7 @@ class FMError(Exception):
         12: 'Name already exists',
         13: 'File or object is in use',
         14: 'Out of range',
-        15: 'Can\'t divide by zero',
+        15: "Can't divide by zero",
         16: 'Operation failed, request retry (for example, a user query)',
         17: 'Attempt to convert foreign character set to UTF-16 failed',
         18: 'Client must provide account information to proceed',
@@ -664,7 +697,7 @@ class FMError(Exception):
         200: 'Record access is denied',
         201: 'Field cannot be modified',
         202: 'Field access is denied',
-        203: 'No records in file to print, or password doesn\'t allow print '
+        203: "No records in file to print, or password doesn't allow print "
         'access',
         204: 'No access to field(s) in sort order',
         205: 'User does not have access privileges to create new records; '
@@ -694,7 +727,7 @@ class FMError(Exception):
         401: 'No records match the request',
         402: 'Selected field is not a match field for a lookup',
         403: 'Exceeding maximum record limit for trial version of '
-        'FileMaker(tm)) Pro',
+        'FileMaker(tm) Pro',
         404: 'Sort order is invalid',
         405: 'Number of records specified exceeds number of records that '
         'can be omitted',
@@ -726,12 +759,12 @@ class FMError(Exception):
         511: 'Value in field exceeds maximum number of allowed characters',
         600: 'Print error has occurred',
         601: 'Combined header and footer exceed one page',
-        602: 'Body doesn\'t fit on a page for current column setup',
+        602: "Body doesn't fit on a page for current column setup",
         603: 'Print connection lost',
         700: 'File is of the wrong file type for import',
         706: 'EPSF file has no preview image',
         707: 'Graphic translator cannot be found',
-        708: 'Can\'t import the file or need color monitor support to '
+        708: "Can't import the file or need color monitor support to "
         'import file',
         709: 'QuickTime movie import failed',
         710: 'Unable to update QuickTime file reference because the '
@@ -781,7 +814,7 @@ class FMError(Exception):
         811: 'Temporary file cannot be opened as FileMaker(tm) Pro file',
         813: 'Record Synchronization error on network',
         814: 'File(s) cannot be opened because maximum number is open',
-        815: 'Couldn\'t open lookup file',
+        815: "Couldn't open lookup file",
         816: 'Unable to convert file',
         817: 'Unable to open file because it does not belong to this solution',
         819: 'Cannot save a local copy of a remote file',
@@ -798,7 +831,7 @@ class FMError(Exception):
         'FileMaker(tm) Server',
         905: 'No active field selected; command can only be used if there '
         'is an active field',
-        920: 'Can\'t initialize the spelling engine',
+        920: "Can't initialize the spelling engine",
         921: 'User dictionary cannot be loaded for editing',
         922: 'User dictionary cannot be found',
         923: 'User dictionary is read-only',
@@ -884,7 +917,7 @@ class FMError(Exception):
     code: int
     """Error code number."""
 
-    def __init__(self, error: str | int = -1, /):
+    def __init__(self, error: str | int = -1, /) -> None:
         if isinstance(error, int):
             self.code = error
             message = FMError.CODES.get(self.code, 'Unknown error code')
@@ -894,7 +927,7 @@ class FMError(Exception):
         super().__init__(error)
 
 
-def escape_unicode(ustr: str, /, quote: bool = True) -> str:
+def escape_unicode(ustr: str, /, *, quote: bool = True) -> str:
     """Return ASCII string for use in XHTML from unicode string.
 
     Parameters:
@@ -910,7 +943,7 @@ def escape_unicode(ustr: str, /, quote: bool = True) -> str:
     )
 
 
-def indent(*args) -> str:
+def indent(*args: str) -> str:
     """Return joined string representations of objects with lines indented."""
     text = '\n'.join(str(arg) for arg in args)
     return '\n'.join(
